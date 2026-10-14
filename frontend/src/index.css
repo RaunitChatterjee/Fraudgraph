@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: 246 248 250; --panel: 255 255 255; --raised: 240 243 246; --line: 208 215 222;
+  --ink: 31 35 40; --muted: 101 109 118; --accent: 9 105 218;
+}
+.dark {
+  --bg: 13 17 23; --panel: 22 27 34; --raised: 33 38 45; --line: 48 54 61;
+  --ink: 230 237 243; --muted: 139 148 158; --accent: 47 129 247;
+}
+
+html, body, #root { height: 100%; }
+body { @apply bg-bg text-ink font-sans antialiased; font-size: 14px; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: rgb(var(--line)); border-radius: 6px; }
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, a:focus-visible {
+  outline: 2px solid rgb(var(--accent)); outline-offset: 1px;
+}
+.tabnum { font-variant-numeric: tabular-nums; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
