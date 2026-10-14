@@ -1,0 +1,26 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: fraudgraph
+      POSTGRES_PASSWORD: fraudgraph
+      POSTGRES_DB: fraudgraph
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fraudgraph"]
+      interval: 5s
+      retries: 10
+  backend:
+    build: ./backend
+    environment:
+      DATABASE_URL: postgresql://fraudgraph:fraudgraph@db:5432/fraudgraph
+      AUTO_SEED: "true"
+    depends_on:
+      db: { condition: service_healthy }
+    ports: ["8000:8000"]
+  frontend:
+    build: ./frontend
+    depends_on: [backend]
+    ports: ["8080:80"]
+volumes:
+  pgdata:
