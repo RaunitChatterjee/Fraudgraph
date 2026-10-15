@@ -4,7 +4,7 @@ import { ErrorBox, Icon, Spinner, TypoTag, fmtTime, inr, useTypo, PRIORITY_HEX }
 
 function Ring({ value }) {
   const R = 30, C = 2 * Math.PI * R
-  const col = value >= 0.8 ? '#f2545b' : value >= 0.5 ? '#f08a3c' : '#7f8db0'
+  const col = value >= 0.8 ? '#c8372d' : value >= 0.5 ? '#d9741c' : '#a89f8e'
   return (
     <svg width="76" height="76" viewBox="0 0 76 76" role="img" aria-label={`Composite suspicion ${value.toFixed(2)}`}>
       <circle cx="38" cy="38" r={R} fill="none" stroke="currentColor" strokeOpacity="0.12" strokeWidth="7" />
@@ -47,7 +47,7 @@ export default function AccountDrawer({ accountId, onClose, onOpenCase }) {
               <Ring value={d.score.composite} />
               <div className="min-w-0">
                 <div className="mono text-xs text-muted">{d.account.id}</div>
-                <div className="truncate text-lg font-semibold">{d.account.holder_name}</div>
+                <div className="font-display truncate text-xl font-medium">{d.account.holder_name}</div>
                 <div className="text-xs text-muted">{d.account.bank} · {d.account.account_type}
                   {d.account.status === 'frozen' && <span className="ml-2 rounded bg-frozen/20 px-1.5 py-0.5 text-frozen">frozen</span>}</div>
                 <div className="mt-1.5 flex flex-wrap gap-1">{d.score.labels.map((t) => <TypoTag key={t} code={t} />)}</div>
@@ -75,7 +75,7 @@ export default function AccountDrawer({ accountId, onClose, onOpenCase }) {
                         <span>{meta ? `${meta.tid} ${meta.name}` : code}</span><span className="num text-muted">{t.score.toFixed(2)}</span>
                       </div>
                       <div className="mt-1 h-1.5 overflow-hidden rounded bg-raised">
-                        <div className="h-full rounded" style={{ width: `${t.score * 100}%`, background: t.score >= 0.45 ? PRIORITY_HEX.High : '#7f8db0' }} />
+                        <div className="h-full rounded" style={{ width: `${t.score * 100}%`, background: t.score >= 0.45 ? PRIORITY_HEX.High : '#a89f8e' }} />
                       </div>
                       {live && (
                         <ul className="mt-1.5 space-y-1 border-l border-line pl-3 text-xs text-muted">

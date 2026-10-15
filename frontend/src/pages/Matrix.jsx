@@ -11,7 +11,7 @@ export default function Matrix({ typologies, onPick }) {
   return (
     <div className="space-y-5">
       <div>
-        <h1 className="text-xl font-semibold">FG-Matrix: financial-crime typologies</h1>
+        <h1 className="font-display text-[28px] font-medium leading-tight">FG-Matrix: financial-crime typologies</h1>
         <p className="mt-1 max-w-3xl text-sm text-muted">
           An original classification of money-laundering modus operandi in UPI and net-banking fraud, organised by tactic in the way MITRE ATT&amp;CK
           organises adversary techniques. Each technique names the signal the detector scores. Select one to list the accounts flagged for it.

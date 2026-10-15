@@ -9,11 +9,13 @@ export default {
       colors: {
         bg: v('bg'), panel: v('panel'), raised: v('raised'), line: v('line'),
         ink: v('ink'), muted: v('muted'), accent: v('accent'), gold: v('gold'),
-        crit: '#f2545b', high: '#f08a3c', med: '#e5b53a', low: '#7f8db0', ok: '#35c28b', frozen: '#9b7bf0',
+        crit: '#c8372d', high: '#d9741c', med: '#c99a14', low: '#a89f8e', ok: '#2f7a5f', frozen: '#2f8a86',
       },
+      borderRadius: { lg: '4px', md: '3px', DEFAULT: '2px', sm: '2px' },
       fontFamily: {
-        sans: ['"IBM Plex Sans"', '"Segoe UI"', 'system-ui', '-apple-system', 'sans-serif'],
-        mono: ['"IBM Plex Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
+        sans: ['"Instrument Sans"', '"Helvetica Neue"', 'system-ui', 'sans-serif'],
+        display: ['Fraunces', 'Georgia', '"Times New Roman"', 'serif'],
+        mono: ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
       },
     },
   },

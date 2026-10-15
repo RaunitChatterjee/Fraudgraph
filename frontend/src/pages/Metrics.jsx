@@ -20,7 +20,7 @@ export default function Metrics() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-xl font-semibold">Evaluation</h1>
+        <h1 className="font-display text-[28px] font-medium leading-tight">Evaluation</h1>
         <p className="mt-1 max-w-3xl text-sm text-muted">
           Scored against the fraud rings injected into the synthetic dataset. The generator is far cleaner than real transaction data and the detector was tuned
           on it, so read this as a regression harness, not a claim about real-world accuracy.
@@ -33,18 +33,18 @@ export default function Metrics() {
           </div>
           <div className="px-4 pb-4">
             <LineChart xs={d.curve.map((r) => r.threshold)} series={[
-              { name: 'Precision', color: '#4c9aff', values: d.curve.map((r) => r.precision) },
-              { name: 'Recall', color: '#f5a524', values: d.curve.map((r) => r.recall) }]} yDomain={[0.5, 1.02]} />
+              { name: 'Precision', color: 'currentColor', values: d.curve.map((r) => r.precision) },
+              { name: 'Recall', color: '#c8372d', values: d.curve.map((r) => r.recall) }]} yDomain={[0.5, 1.02]} />
             <div className="mt-1 flex gap-4 text-xs text-muted">
-              <span className="flex items-center gap-1.5"><i className="h-0.5 w-4 bg-[#4c9aff]" />Precision</span>
-              <span className="flex items-center gap-1.5"><i className="h-0.5 w-4 bg-[#f5a524]" />Recall</span><span>by alert threshold</span>
+              <span className="flex items-center gap-1.5"><i className="h-0.5 w-4 bg-ink" />Precision</span>
+              <span className="flex items-center gap-1.5"><i className="h-0.5 w-4 bg-crit" />Recall</span><span>by alert threshold</span>
             </div>
           </div>
         </Panel>
         <Panel title="False positives on legitimate high-volume accounts" sub="Merchants and payroll accounts look like mules to a naive detector">
           <div className="space-y-4 p-4">
             <HBars max={1} rows={Object.entries(m.false_positive_rate).map(([k, v]) => ({
-              key: k, label: `${k.replaceAll('_', ' ')} (${v.flagged}/${v.accounts})`, value: v.rate, color: v.rate > 0 ? '#f2545b' : '#35c28b' }))}
+              key: k, label: `${k.replaceAll('_', ' ')} (${v.flagged}/${v.accounts})`, value: v.rate, color: v.rate > 0 ? '#c8372d' : '#2f7a5f' }))}
               format={pct} />
             <p className="text-xs text-muted">Primary-typology label accuracy on injected mules: <b className="text-ink">{pct(m.typology.primary_label_accuracy)}</b></p>
           </div>

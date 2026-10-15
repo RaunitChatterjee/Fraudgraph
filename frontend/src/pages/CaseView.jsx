@@ -53,8 +53,8 @@ export default function CaseView({ caseId, onBack, onChanged, onOpenAccount }) {
       <div className="flex flex-wrap items-center gap-3">
         <button onClick={onBack} className="text-sm text-muted hover:text-ink">Investigation queue</button>
         <span className="text-muted">/</span>
-        <h1 className="mono text-lg font-semibold">{c.id}</h1>
-        <PriorityBadge label={c.priority_label} score={c.priority_score} />
+        <h1 className="font-display text-[28px] font-medium leading-none">{c.id}</h1>
+        <span className="ml-1 mr-2"><PriorityBadge label={c.priority_label} score={c.priority_score} size="lg" /></span>
         <select value={c.status} disabled={busy} onChange={(e) => act(() => api.updateCase(c.id, { status: e.target.value }))}
           className="rounded-md border border-line bg-panel px-2 py-1 text-sm" aria-label="Case status">
           {STATUSES.map((s) => <option key={s} value={s}>{STATUS_LABEL[s]}</option>)}
@@ -111,7 +111,7 @@ export default function CaseView({ caseId, onBack, onChanged, onOpenAccount }) {
               <div className="space-y-3">
                 <div><div className="mono text-xs text-muted">{selected.id}</div>
                   <div className="text-base font-semibold">{selected.holder_name || selected.label}</div>
-                  <div className="text-xs text-muted">{selected.bank} {selected.account_type && `· ${selected.account_type}`}{selected.status === 'frozen' && ' · frozen'}</div></div>
+                  <div className="text-xs text-muted">{selected.bank} {selected.account_type && `· ${selected.account_type}`}{selected.status === 'frozen' && ' · sealed'}</div></div>
                 {selected.score != null && <ScoreBar value={selected.score} />}
                 <div className="flex flex-wrap gap-1">{(selected.typologies || selected.labels || []).map((t) => <TypoTag key={t} code={t} />)}</div>
                 {selected.role === 'mule' && (

@@ -30,10 +30,10 @@ export const fmtDuration = (min) => {
   return h >= 48 ? `${(min / 1440).toFixed(1)} d` : m ? `${h} h ${m} m` : `${h} h`
 }
 
-export const PRIORITY_HEX = { Critical: '#f2545b', High: '#f08a3c', Medium: '#e5b53a', Low: '#7f8db0' }
+export const PRIORITY_HEX = { Critical: '#c8372d', High: '#d9741c', Medium: '#c99a14', Low: '#a89f8e' }
 export const STATUS_LABEL = { open: 'Open', investigating: 'Investigating', funds_frozen: 'Funds frozen', closed: 'Closed' }
 export const STATUSES = Object.keys(STATUS_LABEL)
-export const TACTIC_HEX = { Preparation: '#9b7bf0', Placement: '#4c9aff', Layering: '#e5b53a', Extraction: '#f2545b' }
+export const TACTIC_HEX = { Preparation: '#7a5c8e', Placement: '#2b7a78', Layering: '#c99a14', Extraction: '#c8372d' }
 
 export const TypoContext = createContext({})
 export const useTypo = () => useContext(TypoContext)
@@ -41,31 +41,36 @@ export const useTypo = () => useContext(TypoContext)
 export function TypoTag({ code, compact }) {
   const map = useTypo()
   const t = map[code]
-  const color = t ? TACTIC_HEX[t.tactic] : '#7f8db0'
+  const color = t ? TACTIC_HEX[t.tactic] : '#a89f8e'
   return (
     <span title={t ? `${t.tid} ${t.name} (${t.tactic}): ${t.description}` : code}
-      className="inline-flex items-center gap-1.5 rounded-full border border-line bg-raised/60 px-2 py-0.5 text-[11px] leading-none whitespace-nowrap">
-      <i className="inline-block h-1.5 w-1.5 rounded-full" style={{ background: color }} />
+      className="inline-flex items-center gap-1.5 rounded-sm border border-line bg-raised/70 py-0.5 pl-1 pr-2 text-[11px] leading-none whitespace-nowrap">
+      <i className="inline-block h-3 w-1 rounded-[1px]" style={{ background: color }} />
       <span className="mono text-muted">{t ? t.tid : code}</span>{!compact && t && <span>{t.name}</span>}
     </span>
   )
 }
 
-export function PriorityBadge({ label, score }) {
+export function Stamp({ label, color, size }) {
+  return <span className={`stamp ${size === 'lg' ? 'stamp-lg' : ''}`} style={{ color }}>{label}</span>
+}
+
+export function PriorityBadge({ label, score, size }) {
   const c = PRIORITY_HEX[label] || PRIORITY_HEX.Low
   return (
-    <span className="inline-flex items-center gap-1.5 rounded px-1.5 py-0.5 text-xs font-medium" style={{ color: c, background: c + '1f' }}>
-      {label}{score !== undefined && <span className="num opacity-80">{Math.round(score)}</span>}
+    <span className="inline-flex items-center gap-2">
+      <Stamp label={label} color={c} size={size} />
+      {score !== undefined && <span className="num text-xs text-muted" title="Composite risk score out of 100">{Math.round(score)}</span>}
     </span>
   )
 }
 
 export function ScoreBar({ value }) {
   const pct = Math.round((value || 0) * 100)
-  const tone = value >= 0.8 ? '#f2545b' : value >= 0.5 ? '#f08a3c' : '#7f8db0'
+  const tone = value >= 0.8 ? '#c8372d' : value >= 0.5 ? '#d9741c' : '#a89f8e'
   return (
     <div className="flex items-center gap-2" title={`Composite suspicion ${value?.toFixed?.(2)}`}>
-      <div className="h-1.5 w-14 overflow-hidden rounded bg-raised"><div className="h-full" style={{ width: `${pct}%`, background: tone }} /></div>
+      <div className="h-1.5 w-14 overflow-hidden rounded-[1px] bg-raised"><div className="h-full" style={{ width: `${pct}%`, background: tone }} /></div>
       <span className="num w-8 text-xs text-muted">{value?.toFixed?.(2)}</span>
     </div>
   )
@@ -75,8 +80,8 @@ export function Panel({ title, sub, right, children, className = '', bodyClass =
   return (
     <section className={`rounded-lg border border-line bg-panel ${className}`}>
       {(title || right) && (
-        <header className="flex items-start justify-between gap-3 border-b border-line px-4 py-3">
-          <div><h2 className="text-[13px] font-semibold">{title}</h2>{sub && <p className="mt-0.5 text-xs text-muted">{sub}</p>}</div>{right}
+        <header className="flex items-start justify-between gap-3 border-b-[3px] border-double border-ink/25 px-4 py-3">
+          <div><h2 className="font-display text-[16px] font-medium">{title}</h2>{sub && <p className="mt-0.5 text-xs text-muted">{sub}</p>}</div>{right}
         </header>
       )}
       <div className={bodyClass}>{children}</div>

@@ -9,10 +9,10 @@ import Overview from './pages/Overview.jsx'
 import Queue from './pages/Queue.jsx'
 
 const NAV = [
-  ['overview', 'Overview', 'overview'],
-  ['queue', 'Investigations', 'queue'],
-  ['matrix', 'Typology matrix', 'matrix'],
-  ['metrics', 'Evaluation', 'eval'],
+  ['overview', 'Overview'],
+  ['queue', 'Investigations'],
+  ['matrix', 'Typology matrix'],
+  ['metrics', 'Evaluation'],
 ]
 
 function IntakeModal({ onClose, onCreated }) {
@@ -33,8 +33,8 @@ function IntakeModal({ onClose, onCreated }) {
   const inp = 'mt-1 w-full rounded-md border border-line bg-bg px-2.5 py-1.5 text-sm'
   return (
     <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/60 p-4" role="dialog" aria-modal="true" aria-label="Register complaint">
-      <form onSubmit={submit} className="w-full max-w-md space-y-3 rounded-lg border border-line bg-panel p-5">
-        <h2 className="text-base font-semibold">Register complaint</h2>
+      <form onSubmit={submit} className="w-full max-w-md space-y-3 rounded-lg border-2 border-ink/80 bg-panel p-6">
+        <h2 className="font-display text-xl font-medium">Register a complaint</h2>
         <p className="text-xs text-muted">Enter the victim account and either the transaction id from the victim's statement or the amount. The origin transfer is located and the money trail traced.</p>
         <label className="block text-xs text-muted">Victim account<input required className={inp} value={f.victim_account} onChange={set('victim_account')} placeholder="ACC12345678" /></label>
         <label className="block text-xs text-muted">Origin transaction id<input className={inp} value={f.origin_txn_id} onChange={set('origin_txn_id')} placeholder="TXN000012345" /></label>
@@ -51,7 +51,7 @@ function IntakeModal({ onClose, onCreated }) {
 }
 
 export default function App() {
-  const [dark, setDark] = useState(true)
+  const [dark, setDark] = useState(false)
   const [page, setPage] = useState('overview')
   const [caseId, setCaseId] = useState(null)
   const [typologies, setTypologies] = useState([])
@@ -74,59 +74,57 @@ export default function App() {
 
   return (
     <TypoContext.Provider value={typoMap}>
-      <div className="flex h-full">
-        <aside className="hidden w-[212px] shrink-0 flex-col border-r border-line bg-panel md:flex">
-          <div className="flex items-center gap-2.5 px-4 py-4">
-            <svg width="26" height="26" viewBox="0 0 32 32" aria-hidden="true">
-              <rect width="32" height="32" rx="7" fill="rgb(var(--raised))" />
-              <path d="M7 22L14 11l5 7 6-10" stroke="#f5a524" strokeWidth="2.6" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-              <circle cx="7" cy="22" r="2.4" fill="#4c9aff" /><circle cx="25" cy="8" r="2.4" fill="#f5a524" />
-            </svg>
-            <div><div className="text-[15px] font-semibold leading-tight">FraudGraph</div><div className="text-[11px] text-muted">Mule network investigation</div></div>
-          </div>
-          <nav className="flex-1 space-y-0.5 px-2 pt-1">
-            {NAV.map(([k, l, icon]) => (
-              <button key={k} onClick={() => go(k)} aria-current={activeNav === k ? 'page' : undefined}
-                className={`flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-left text-[13px] ${activeNav === k ? 'bg-accent/15 font-medium text-ink' : 'text-muted hover:bg-raised hover:text-ink'}`}>
-                <Icon name={icon} size={16} className={activeNav === k ? 'text-accent' : ''} />{l}
-              </button>
-            ))}
-          </nav>
-          <div className="space-y-2 border-t border-line p-3">
-            <button onClick={() => setIntake(true)} className="flex w-full items-center justify-center gap-1.5 rounded-md bg-accent px-3 py-2 text-[13px] font-medium text-white">
-              <Icon name="plus" size={15} />Register complaint</button>
-            <p className="px-1 text-[11px] leading-snug text-muted">Synthetic data. No real accounts or banking systems.</p>
-          </div>
-        </aside>
+      <div className="flex min-h-full flex-col">
+        <header className="border-b-[3px] border-double border-ink/30 bg-panel/80">
+          <div className="mx-auto flex max-w-[1520px] flex-wrap items-center gap-x-6 gap-y-3 px-4 pb-0 pt-3 md:px-6">
+            <button onClick={() => go('overview')} className="flex items-center gap-3 text-left" aria-label="FraudGraph home">
+              <svg width="34" height="34" viewBox="0 0 32 32" aria-hidden="true">
+                <rect width="32" height="32" rx="3" fill="rgb(var(--ink))" />
+                <path d="M7 23L14 12l5 7 6-11" stroke="rgb(var(--panel))" strokeWidth="2.4" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+                <circle cx="25" cy="8" r="3" fill="#c8372d" />
+              </svg>
+              <span>
+                <span className="font-display block text-[22px] font-medium leading-none">FraudGraph</span>
+                <span className="mt-1 block text-[11.5px] italic text-muted">Register of mule-account investigations</span>
+              </span>
+            </button>
 
-        <main className="flex min-w-0 flex-1 flex-col">
-          <header className="flex items-center gap-3 border-b border-line bg-panel px-4 py-2.5">
-            <form className="relative max-w-md flex-1" onSubmit={(e) => { e.preventDefault(); if (search.trim()) { setDrawer(search.trim()); setSearch('') } }}>
-              <Icon name="search" size={15} className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-muted" />
-              <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Look up an account id, e.g. ACC12345678"
-                aria-label="Look up account" className="mono w-full rounded-md border border-line bg-bg py-1.5 pl-8 pr-2 text-[13px] placeholder:font-sans" />
+            <form className="relative ml-auto w-full max-w-sm sm:w-72" onSubmit={(e) => { e.preventDefault(); if (search.trim()) { setDrawer(search.trim()); setSearch('') } }}>
+              <Icon name="search" size={14} className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-muted" />
+              <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Look up account, e.g. ACC12345678"
+                aria-label="Look up account" className="mono w-full rounded-sm border border-line bg-bg/70 py-1.5 pl-8 pr-2 text-[12.5px] placeholder:font-sans placeholder:text-muted" />
             </form>
-            <div className="ml-auto flex items-center gap-3">
-              {asOf && <span className="hidden items-center gap-1.5 rounded-full border border-line px-2.5 py-1 text-xs text-muted sm:flex" title="Dataset reference time">
-                <Icon name="clock" size={13} />Data as of {fmtTime(asOf)}</span>}
-              <button onClick={() => setDark(!dark)} className="rounded-md border border-line p-1.5 text-muted hover:text-ink" aria-label="Toggle light or dark theme">
-                <Icon name={dark ? 'sun' : 'moon'} size={16} /></button>
-              <button onClick={() => setIntake(true)} className="rounded-md bg-accent px-2.5 py-1.5 text-xs font-medium text-white md:hidden">+ Complaint</button>
+            <div className="flex items-center gap-2.5">
+              {asOf && <span className="hidden items-center gap-1.5 text-xs text-muted lg:flex" title="Dataset reference time"><Icon name="clock" size={13} />As of {fmtTime(asOf)}</span>}
+              <button onClick={() => setDark(!dark)} className="rounded-sm border border-line p-1.5 text-muted hover:text-ink" aria-label="Switch between ledger paper and night desk themes">
+                <Icon name={dark ? 'sun' : 'moon'} size={15} /></button>
+              <button onClick={() => setIntake(true)} className="inline-flex items-center gap-1.5 rounded-sm bg-accent px-3 py-1.5 text-[13px] font-medium text-white">
+                <Icon name="plus" size={14} />Register complaint</button>
             </div>
-          </header>
-          <nav className="flex gap-1 overflow-x-auto border-b border-line bg-panel px-2 py-1.5 md:hidden">
-            {NAV.map(([k, l]) => <button key={k} onClick={() => go(k)} className={`whitespace-nowrap rounded px-2.5 py-1 text-xs ${activeNav === k ? 'bg-accent/15 text-ink' : 'text-muted'}`}>{l}</button>)}
-          </nav>
-          <div className="flex-1 overflow-y-auto">
-            <div className="mx-auto max-w-[1520px] p-4 md:p-6">
-              <ErrorBox error={err} />
-              {page === 'overview' && <Overview onOpenCase={openCase} refreshKey={tick} />}
-              {page === 'queue' && <Queue onOpenCase={openCase} onOpenAccount={setDrawer} presetTypology={preset} refreshKey={tick} />}
-              {page === 'case' && <CaseView caseId={caseId} onBack={() => go('queue')} onChanged={() => setTick((x) => x + 1)} onOpenAccount={setDrawer} />}
-              {page === 'matrix' && <Matrix typologies={typologies} onPick={(c) => { setPreset(c); setPage('queue') }} />}
-              {page === 'metrics' && <Metrics />}
-            </div>
+
+            <nav className="-mb-px flex w-full gap-1 overflow-x-auto" aria-label="Sections">
+              {NAV.map(([k, l]) => (
+                <button key={k} onClick={() => go(k)} aria-current={activeNav === k ? 'page' : undefined}
+                  className={`whitespace-nowrap border-x border-t px-4 py-2 text-[13px] ${activeNav === k
+                    ? 'relative border-ink/30 bg-bg font-medium text-ink' : 'border-transparent text-muted hover:text-ink'}`}
+                  style={activeNav === k ? { borderTopWidth: 3, borderTopColor: '#c8372d', marginBottom: -1 } : undefined}>{l}</button>
+              ))}
+            </nav>
           </div>
+        </header>
+
+        <main className="flex-1">
+          <div className="mx-auto max-w-[1520px] p-4 md:p-6">
+            <ErrorBox error={err} />
+            {page === 'overview' && <Overview onOpenCase={openCase} refreshKey={tick} />}
+            {page === 'queue' && <Queue onOpenCase={openCase} onOpenAccount={setDrawer} presetTypology={preset} refreshKey={tick} />}
+            {page === 'case' && <CaseView caseId={caseId} onBack={() => go('queue')} onChanged={() => setTick((x) => x + 1)} onOpenAccount={setDrawer} />}
+            {page === 'matrix' && <Matrix typologies={typologies} onPick={(c) => { setPreset(c); setPage('queue') }} />}
+            {page === 'metrics' && <Metrics />}
+          </div>
+          <footer className="mx-auto max-w-[1520px] px-6 pb-6 text-[11.5px] italic text-muted">
+            All data in this register is synthetic. No real accounts, people or banking systems are involved.
+          </footer>
         </main>
 
         {drawer && <AccountDrawer accountId={drawer} onClose={() => setDrawer(null)} onOpenCase={openCase} />}

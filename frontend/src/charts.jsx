@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import * as d3 from 'd3'
 import { PRIORITY_HEX, fmtDay } from './lib.jsx'
 
-export function Sparkline({ data, w = 90, h = 26, color = '#4c9aff' }) {
+export function Sparkline({ data, w = 90, h = 26, color = 'currentColor' }) {
   if (!data?.length) return null
   const x = d3.scaleLinear([0, data.length - 1], [2, w - 2])
   const y = d3.scaleLinear([0, d3.max(data) || 1], [h - 2, 2])
@@ -24,8 +24,8 @@ export function HBars({ rows, max, format = (v) => v, onPick }) {
             className="group grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 text-left disabled:cursor-default">
             <span className="truncate text-[13px]">{r.label}</span>
             <span className="num text-xs text-muted">{format(r.value)}</span>
-            <span className="col-span-2 mt-1 block h-1.5 overflow-hidden rounded bg-raised">
-              <span className="block h-full rounded transition-[width]" style={{ width: `${(r.value / m) * 100}%`, background: r.color || '#4c9aff' }} />
+            <span className="col-span-2 mt-1 block h-1.5 overflow-hidden rounded-[1px] bg-raised">
+              <span className="block h-full transition-[width]" style={{ width: `${(r.value / m) * 100}%`, background: r.color || 'rgb(var(--ink))' }} />
             </span>
           </button>
         </li>
@@ -48,7 +48,7 @@ export function Donut({ parts, size = 132, center }) {
 }
 
 /** Responsive area chart for a daily series. data: [{day, value}] */
-export function AreaChart({ data, color = '#4c9aff', format = (v) => v, height = 150, highlightLast }) {
+export function AreaChart({ data, color = 'currentColor', format = (v) => v, height = 150, highlightLast }) {
   const W = 640
   const m = { t: 10, r: 8, b: 22, l: 40 }
   const { x, y, area, line, ticks } = useMemo(() => {

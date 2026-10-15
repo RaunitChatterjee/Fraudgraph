@@ -22,8 +22,8 @@ function LagPlot({ lag, onOpenCase }) {
           <text x={x(t)} y={H - 10} textAnchor="middle" fontSize="10" fill="currentColor" fillOpacity="0.6">{lab(t)}</text>
         </g>
       ))}
-      <rect x={x(10)} y={top - 6} width={x(60) - x(10)} height={H - bottom - top + 6} fill="rgb(var(--gold))" fillOpacity="0.1" />
-      <text x={(x(10) + x(60)) / 2} y={top - 12} textAnchor="middle" fontSize="10.5" fontWeight="600" fill="rgb(var(--gold))">golden hour</text>
+      <rect x={x(10)} y={top - 6} width={x(60) - x(10)} height={H - bottom - top + 6} fill="#d98e04" fillOpacity="0.15" />
+      <text x={(x(10) + x(60)) / 2} y={top - 12} textAnchor="middle" fontSize="10.5" fontWeight="600" fill="#a86b00">golden hour</text>
       {rows.map((r, i) => {
         const y = top + i * rowH + rowH / 2
         const gone = r.gone_before_filing
@@ -33,10 +33,10 @@ function LagPlot({ lag, onOpenCase }) {
             <circle cx={7} cy={y} r="3.5" fill={PRIORITY_HEX[r.priority]} />
             <text x={18} y={y} dy="0.33em" fontSize="10.5" className="mono" fill="currentColor">{r.case_id}</text>
             <line x1={x(10)} x2={x(10)} y1={y} y2={y} />
-            <rect x={x(10)} y={y - 3} width={Math.max(2, x(Math.max(10, r.money_span_minutes)) - x(10))} height="6" rx="3" fill="#f5a524" fillOpacity="0.85">
+            <rect x={x(10)} y={y - 3} width={Math.max(2, x(Math.max(10, r.money_span_minutes)) - x(10))} height="6" rx="1" fill="currentColor" fillOpacity="0.8">
               <title>{`Funds fully cashed out ${fmtDuration(r.money_span_minutes)} after the transfer`}</title>
             </rect>
-            <path d={`M ${x(r.report_delay_min)} ${y - 6} l 6 6 l -6 6 l -6 -6 z`} fill={gone ? '#f2545b' : '#35c28b'}>
+            <path d={`M ${x(r.report_delay_min)} ${y - 6} l 6 6 l -6 6 l -6 -6 z`} fill={gone ? '#c8372d' : '#2f7a5f'}>
               <title>{`Complaint filed ${fmtDuration(r.report_delay_min)} after the transfer${gone ? ': money already gone' : ''}`}</title>
             </path>
           </g>
@@ -51,7 +51,7 @@ function Kpi({ label, value, sub, spark, color }) {
     <div className="flex items-end justify-between gap-3 border-r border-line px-4 py-3 last:border-r-0">
       <div className="min-w-0">
         <div className="text-xs text-muted">{label}</div>
-        <div className="num mt-0.5 text-[22px] font-semibold leading-tight">{value}</div>
+        <div className="num font-display mt-0.5 text-[26px] font-medium leading-tight">{value}</div>
         {sub && <div className="mt-0.5 truncate text-xs text-muted">{sub}</div>}
       </div>
       {spark && <Sparkline data={spark} color={color} />}
@@ -85,7 +85,7 @@ export default function Overview({ onOpenCase, refreshKey }) {
       <Panel bodyClass="p-5 md:p-6">
         <div className="grid gap-6 lg:grid-cols-[minmax(0,360px)_minmax(0,1fr)]">
           <div>
-            <p className="text-[22px] font-semibold leading-snug">
+            <p className="font-display text-[30px] font-medium leading-[1.15]">
               In {ov.gone_before_filing} of {ov.total_cases} cases the money was already cashed out before the complaint was filed.
             </p>
             <p className="mt-3 text-[13px] leading-relaxed text-muted">
@@ -94,7 +94,7 @@ export default function Overview({ onOpenCase, refreshKey }) {
               not hop by hop through bank statements.
             </p>
             <div className="mt-4 space-y-1.5 text-xs text-muted">
-              <div className="flex items-center gap-2"><i className="inline-block h-1.5 w-8 rounded-full bg-[#f5a524]" />time until funds fully cashed out</div>
+              <div className="flex items-center gap-2"><i className="inline-block h-1.5 w-8 bg-ink" />time until funds fully cashed out</div>
               <div className="flex items-center gap-2"><i className="inline-block h-2.5 w-2.5 rotate-45 bg-crit" />complaint filed after cash-out (money gone)</div>
               <div className="flex items-center gap-2"><i className="inline-block h-2.5 w-2.5 rotate-45 bg-ok" />complaint filed while funds still moving</div>
             </div>
@@ -106,16 +106,16 @@ export default function Overview({ onOpenCase, refreshKey }) {
       <div className="grid overflow-hidden rounded-lg border border-line bg-panel sm:grid-cols-2 xl:grid-cols-5">
         <Kpi label="Open cases" value={open} sub={`${ov.priority.Critical} critical · ${ov.priority.High} high`} />
         <Kpi label="Reported lost" value={compactInr(ov.totals.reported)} sub={`${stats.complaints} complaints`}
-          spark={daily.map((d) => d.amount)} color="#f2545b" />
+          spark={daily.map((d) => d.amount)} color="#c8372d" />
         <Kpi label="Cash-out detected" value={compactInr(ov.totals.cash_out)} sub="across traced chains" />
         <Kpi label="Still in mule accounts" value={compactInr(ov.totals.recoverable)} sub={`${compactInr(stats.amount_frozen)} frozen so far`} />
         <Kpi label="Accounts flagged" value={stats.flagged_accounts} sub={`of ${stats.accounts.toLocaleString('en-IN')} · ${stats.transactions.toLocaleString('en-IN')} txns`}
-          spark={ov.volume_by_day.map((d) => d.count)} color="#4c9aff" />
+          spark={ov.volume_by_day.map((d) => d.count)} color="currentColor" />
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
         <Panel title="Reported fraud per day" sub="Amount in complaints filed, last 21 days">
-          <div className="p-4"><AreaChart data={daily.map((d) => ({ day: d.day, value: d.amount }))} color="#f2545b" format={compactInr} /></div>
+          <div className="p-4"><AreaChart data={daily.map((d) => ({ day: d.day, value: d.amount }))} color="#c8372d" format={compactInr} /></div>
         </Panel>
         <Panel title="Case priority" sub="Composite of amount, centrality, recency and detection confidence">
           <div className="flex items-center gap-5 p-4">

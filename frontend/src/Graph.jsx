@@ -5,18 +5,18 @@ import { Icon } from './lib.jsx'
 const short = (id) => (id.startsWith('CASH:') ? 'ATM' : id.slice(-6))
 
 export function nodeColor(n) {
-  if (n.status === 'frozen') return '#9b7bf0'
-  if (n.role === 'victim') return '#4c9aff'
-  if (n.role === 'cash') return '#f5a524'
-  if (n.role === 'boundary') return '#6b7a9c'
+  if (n.status === 'frozen') return '#2f8a86'
+  if (n.role === 'victim') return 'currentColor'
+  if (n.role === 'cash') return '#d98e04'
+  if (n.role === 'boundary') return '#8a8174'
   const s = n.score || 0
-  if (n.role === 'mule') return s >= 0.8 ? '#f2545b' : s >= 0.5 ? '#f08a3c' : '#e5b53a'
-  return s >= 0.5 ? '#f2545b' : '#8795b5'
+  if (n.role === 'mule') return s >= 0.8 ? '#c8372d' : s >= 0.5 ? '#d9741c' : '#c99a14'
+  return s >= 0.5 ? '#c8372d' : '#a89f8e'
 }
 
 export const LEGEND = [
-  ['#4c9aff', 'Victim'], ['#f2545b', 'High suspicion'], ['#f08a3c', 'Moderate'],
-  ['#f5a524', 'Cash-out'], ['#8795b5', 'Neighbour / hub'], ['#9b7bf0', 'Frozen'],
+  ['rgb(var(--ink))', 'Victim'], ['#c8372d', 'High suspicion'], ['#d9741c', 'Moderate'],
+  ['#d98e04', 'Cash-out'], ['#a89f8e', 'Neighbour / hub'], ['#2f8a86', 'Sealed (frozen)'],
 ]
 
 const compact = (v) => (v >= 1e5 ? `${(v / 1e5).toFixed(1)}L` : v >= 1e3 ? `${(v / 1e3).toFixed(0)}k` : `${Math.round(v)}`)
@@ -62,7 +62,7 @@ export default function Graph({ nodes, edges, selectedId, onSelect, onExpand, he
     svg.append('defs').append('marker')
       .attr('id', 'arrow').attr('viewBox', '0 -4 8 8').attr('refX', 17).attr('refY', 0)
       .attr('markerWidth', 6).attr('markerHeight', 6).attr('orient', 'auto')
-      .append('path').attr('d', 'M0,-4L8,0L0,4').attr('fill', '#7f8db0')
+      .append('path').attr('d', 'M0,-4L8,0L0,4').attr('fill', 'currentColor').attr('fill-opacity', 0.55)
 
     const ns = nodes.map((n) => ({ ...n }))
     const ids = new Set(ns.map((n) => n.id))
@@ -80,8 +80,8 @@ export default function Graph({ nodes, edges, selectedId, onSelect, onExpand, he
         .strength((d) => (hopLayout && d.hop != null ? 0.22 : 0.04)))
 
     const link = root.append('g').selectAll('line').data(es).join('line')
-      .attr('stroke', (d) => (d.loop ? '#f2545b' : '#7f8db0'))
-      .attr('stroke-opacity', 0.55)
+      .attr('stroke', (d) => (d.loop ? '#c8372d' : 'currentColor'))
+      .attr('stroke-opacity', (d) => (d.loop ? 0.8 : 0.4))
       .attr('stroke-width', (d) => 0.8 + Math.min(3, Math.log10(Math.max(10, d.amount || 10)) - 2))
       .attr('marker-end', 'url(#arrow)')
     link.append('title').text((d) => `₹${Math.round(d.amount || 0).toLocaleString('en-IN')}${d.loop ? ' (loop)' : ''}`)
@@ -100,7 +100,7 @@ export default function Graph({ nodes, edges, selectedId, onSelect, onExpand, he
         .on('end', (e) => { if (!e.active) sim.alphaTarget(0) }))
 
     node.append('circle').attr('class', 'dot').attr('r', radius).attr('fill', nodeColor)
-      .attr('stroke', 'rgb(14 22 40)').attr('stroke-width', 1.5)
+      .style('stroke', 'rgb(var(--panel))').attr('stroke-width', 2)
     node.append('text').text((d) => short(d.id))
       .attr('dy', (d) => radius(d) + 11).attr('text-anchor', 'middle').attr('font-size', 9)
       .attr('class', 'mono').attr('fill', 'currentColor').attr('fill-opacity', 0.72)
@@ -119,14 +119,14 @@ export default function Graph({ nodes, edges, selectedId, onSelect, onExpand, he
 
   useEffect(() => {
     d3.select(svgRef.current).selectAll('g.node circle.dot')
-      .attr('stroke', (d) => (d.id === selectedId ? '#ffffff' : 'rgb(14 22 40)'))
-      .attr('stroke-width', (d) => (d.id === selectedId ? 3 : 1.5))
+      .style('stroke', (d) => (d.id === selectedId ? 'rgb(var(--accent))' : 'rgb(var(--panel))'))
+      .attr('stroke-width', (d) => (d.id === selectedId ? 3.5 : 2))
   }, [selectedId, nodes, edges, layout, amounts])
 
-  const tb = 'flex items-center gap-1 rounded border border-line bg-panel/90 px-2 py-1 text-xs hover:border-accent'
+  const tb = 'flex items-center gap-1 rounded border border-line bg-panel/95 px-2 py-1 text-xs hover:border-accent'
   return (
     <div className="relative">
-      <svg ref={svgRef} width="100%" height={height} className="block text-ink" role="img" aria-label="Transaction network graph" />
+      <svg ref={svgRef} width="100%" height={height} className="graphpaper block text-ink" role="img" aria-label="Transaction network graph" />
       <div className="absolute right-3 top-3 flex gap-1.5">
         <button className={tb} onClick={() => fit(true)} title="Fit graph to view"><Icon name="expand" size={13} />Fit</button>
         <button className={tb} onClick={() => setLayout(layout === 'hop' ? 'free' : 'hop')} title="Toggle layout">
@@ -134,7 +134,7 @@ export default function Graph({ nodes, edges, selectedId, onSelect, onExpand, he
         </button>
         <button className={`${tb} ${amounts ? 'border-accent text-accent' : ''}`} onClick={() => setAmounts(!amounts)}>₹ labels</button>
       </div>
-      <div className="pointer-events-none absolute bottom-3 left-3 flex flex-wrap gap-x-3 gap-y-1 rounded-md bg-panel/85 px-2.5 py-1.5 text-[11px]">
+      <div className="pointer-events-none absolute bottom-3 left-3 flex flex-wrap gap-x-3 gap-y-1 rounded-sm border border-line bg-panel/90 px-2.5 py-1.5 text-[11px]">
         {LEGEND.map(([c, l]) => <span key={l} className="flex items-center gap-1.5"><i className="inline-block h-2.5 w-2.5 rounded-full" style={{ background: c }} />{l}</span>)}
       </div>
     </div>

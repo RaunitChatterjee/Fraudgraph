@@ -9,8 +9,8 @@ function MoneyBar({ amount, cash, held }) {
   return (
     <div className="w-36" title={`Cashed out ${compactInr(cash)} · still held ${compactInr(held)} · elsewhere ${compactInr(o * a)}`}>
       <div className="flex h-2 overflow-hidden rounded bg-raised">
-        <i style={{ width: `${c * 100}%`, background: '#f5a524' }} /><i style={{ width: `${h * 100}%`, background: '#35c28b' }} />
-        <i style={{ width: `${o * 100}%`, background: '#7f8db0', opacity: 0.5 }} />
+        <i style={{ width: `${c * 100}%`, background: '#d98e04' }} /><i style={{ width: `${h * 100}%`, background: '#2f7a5f' }} />
+        <i style={{ width: `${o * 100}%`, background: '#a89f8e', opacity: 0.5 }} />
       </div>
       <div className="mt-1 flex justify-between text-[11px] text-muted"><span>{compactInr(cash)} out</span><span>{compactInr(held)} held</span></div>
     </div>
@@ -40,10 +40,10 @@ export default function Queue({ onOpenCase, onOpenAccount, presetTypology, refre
     <div className="space-y-4">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-xl font-semibold">Investigation queue</h1>
+          <h1 className="font-display text-[28px] font-medium leading-tight">Investigation queue</h1>
           <p className="text-sm text-muted">{tab === 'cases' ? 'Complaints ranked by composite risk. Open one to trace the money.' : 'Every account the detector flagged, whether or not a complaint exists yet.'}</p>
         </div>
-        <div className="flex rounded-md border border-line bg-panel p-0.5 text-sm" role="tablist">
+        <div className="flex rounded-sm border border-line bg-panel p-0.5 text-sm" role="tablist">
           {[['cases', 'Cases'], ['alerts', 'Account alerts']].map(([k, l]) => (
             <button key={k} role="tab" aria-selected={tab === k} onClick={() => setTab(k)}
               className={`rounded px-3 py-1 ${tab === k ? 'bg-accent text-white' : 'text-muted hover:text-ink'}`}>{l}</button>
