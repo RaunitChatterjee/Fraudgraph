@@ -8,12 +8,12 @@ export default {
     extend: {
       colors: {
         bg: v('bg'), panel: v('panel'), raised: v('raised'), line: v('line'),
-        ink: v('ink'), muted: v('muted'), accent: v('accent'),
-        crit: '#f85149', high: '#db6d28', med: '#d29922', low: '#768390', ok: '#3fb950',
+        ink: v('ink'), muted: v('muted'), accent: v('accent'), gold: v('gold'),
+        crit: '#f2545b', high: '#f08a3c', med: '#e5b53a', low: '#7f8db0', ok: '#35c28b', frozen: '#9b7bf0',
       },
       fontFamily: {
-        sans: ['"Segoe UI Variable Text"', '"Segoe UI"', 'system-ui', '-apple-system', 'Roboto', 'sans-serif'],
-        mono: ['"Cascadia Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
+        sans: ['"IBM Plex Sans"', '"Segoe UI"', 'system-ui', '-apple-system', 'sans-serif'],
+        mono: ['"IBM Plex Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
       },
     },
   },

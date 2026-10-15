@@ -87,6 +87,17 @@ class FraudGraphService:
                 self._by_address[a["kyc_address"]].append(a["id"])
             self._metrics_cache = None
 
+    def ensure_cases(self) -> int:
+        """Create cases for any complaint that has none (repairs an interrupted seed)."""
+        with self.lock:
+            have = {r["complaint_id"] for r in self.db.query("SELECT complaint_id FROM cases")}
+            made = 0
+            for c in self.db.query("SELECT * FROM complaints ORDER BY filed_at"):
+                if c["id"] not in have and c["origin_txn_id"] in self.tx_by_id:
+                    self._create_case(c)
+                    made += 1
+            return made
+
     @property
     def as_of(self) -> datetime:
         v = self.db.get_meta("as_of")
@@ -110,6 +121,43 @@ class FraudGraphService:
             "amount_reported": float(amt), "amount_frozen": float(frozen),
             "frozen_accounts": d.one("SELECT COUNT(*) AS n FROM accounts WHERE status = 'frozen'")["n"],
             "as_of": iso(self.as_of), "window_days": round((self.an.as_of - min(t["ts"] for t in self.an.txns)).days) if self.an.txns else 0,
+        }
+
+    def overview(self) -> dict:
+        cases = self.list_cases()
+        end = self.as_of.date()
+        by_day = defaultdict(lambda: {"count": 0, "amount": 0.0})
+        for c in cases:
+            d = c["filed_at"][:10]
+            by_day[d]["count"] += 1
+            by_day[d]["amount"] += c["amount"]
+        vol = defaultdict(lambda: {"count": 0, "amount": 0.0})
+        for t in self.an.txns:
+            if t["kind"] == "transfer":
+                d = t["ts"].date().isoformat()
+                vol[d]["count"] += 1
+                vol[d]["amount"] += t["amount"]
+        days = [(end - timedelta(days=i)).isoformat() for i in range(20, -1, -1)]
+        prio = defaultdict(int)
+        for c in cases:
+            prio[c["priority_label"]] += 1
+        lag = [{"case_id": c["id"], "priority": c["priority_label"], "amount": c["amount"],
+                "report_delay_min": c["report_delay_min"], "money_span_minutes": c["money_span_minutes"],
+                "gone_before_filing": (c["report_delay_min"] or 0) > c["money_span_minutes"]} for c in cases]
+        gone = sum(1 for x in lag if x["gone_before_filing"])
+        return {
+            "complaints_by_day": [{"day": d, **by_day.get(d, {"count": 0, "amount": 0.0})} for d in days],
+            "volume_by_day": [{"day": d, **vol.get(d, {"count": 0, "amount": 0.0})} for d in days],
+            "priority": {k: prio.get(k, 0) for k in ("Critical", "High", "Medium", "Low")},
+            "typologies": [{"code": t["code"], "tid": t["tid"], "name": t["name"], "tactic": t["tactic"],
+                            "flagged": t["flagged_accounts"]} for t in self.typologies()],
+            "lag": lag,
+            "gone_before_filing": gone,
+            "total_cases": len(cases),
+            "totals": {"reported": sum(c["amount"] for c in cases),
+                       "cash_out": sum(c["cash_out_total"] for c in cases),
+                       "recoverable": sum(c["recoverable_amount"] for c in cases)},
+            "top_cases": cases[:5],
         }
 
     def typologies(self) -> list:
@@ -307,7 +355,7 @@ class FraudGraphService:
 
     def list_cases(self, status=None, typology=None, label=None, q=None) -> list:
         sql = ("SELECT c.id, c.complaint_id, c.status, c.priority_score, c.priority_label, c.assigned_to, c.created_at, "
-               "c.analysis, p.victim_account, p.amount, p.filed_at, p.category FROM cases c JOIN complaints p ON p.id = c.complaint_id")
+               "c.analysis, p.victim_account, p.amount, p.filed_at, p.category, p.origin_txn_id FROM cases c JOIN complaints p ON p.id = c.complaint_id")
         rows = self.db.query(sql)
         out = []
         for r in rows:
@@ -320,7 +368,11 @@ class FraudGraphService:
                 continue
             if q and q.lower() not in f"{r['id']} {r['complaint_id']} {r['victim_account']} {r['category']}".lower():
                 continue
+            origin = self.tx_by_id.get(r["origin_txn_id"])
+            delay = ((to_dt(r["filed_at"]) - origin["ts"]).total_seconds() / 60.0) if origin else None
             out.append({
+                "report_delay_min": round(delay, 1) if delay is not None else None,
+                "money_span_minutes": a["stats"]["money_span_minutes"],
                 "id": r["id"], "complaint_id": r["complaint_id"], "status": r["status"], "priority_score": r["priority_score"],
                 "priority_label": r["priority_label"], "victim_account": r["victim_account"], "amount": r["amount"],
                 "filed_at": iso(r["filed_at"]), "category": r["category"], "assigned_to": r["assigned_to"],
@@ -346,10 +398,14 @@ class FraudGraphService:
         frozen = 0.0
         for e in events:
             e["payload"] = json.loads(e["payload"])
-            e["ts"] = iso(e["ts"])
+            e["ts"] = iso(e["ts"]) + "Z"   # events are recorded in real UTC; synthetic data times stay naive
             if e["kind"] == "freeze":
                 frozen += e["payload"].get("amount_frozen", 0.0)
+        origin = self.tx_by_id.get(comp["origin_txn_id"])
+        origin_ts = iso(origin["ts"]) if origin else None
+        delay = ((to_dt(comp["filed_at"]) - origin["ts"]).total_seconds() / 60.0) if origin else None
         return {"id": r["id"], "status": r["status"], "priority_score": r["priority_score"],
+                "origin_ts": origin_ts, "report_delay_min": round(delay, 1) if delay is not None else None,
                 "priority_label": r["priority_label"], "assigned_to": r["assigned_to"],
                 "created_at": iso(r["created_at"]), "updated_at": iso(r["updated_at"]),
                 "complaint": comp, "analysis": analysis, "linked_accounts": analysis.get("linked_accounts", []),

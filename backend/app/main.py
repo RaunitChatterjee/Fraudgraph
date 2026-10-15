@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from contextlib import asynccontextmanager
+from typing import Optional
 
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
@@ -14,7 +15,7 @@ from .schemas import CaseUpdate, ComplaintIn, FreezeIn, NoteIn, ReseedIn
 from .service import FraudGraphService, NotFound
 
 
-def create_app(database_url: str | None = None, auto_seed: bool | None = None) -> FastAPI:
+def create_app(database_url: Optional[str] = None, auto_seed: Optional[bool] = None) -> FastAPI:
     db = Database(database_url or config.DATABASE_URL)
     svc = FraudGraphService(db)
 
@@ -25,6 +26,7 @@ def create_app(database_url: str | None = None, auto_seed: bool | None = None) -
                 svc.seed()
         else:
             svc.load()
+            svc.ensure_cases()
         yield
 
     app = FastAPI(title="FraudGraph API", version=__version__, lifespan=lifespan,
@@ -51,12 +53,16 @@ def create_app(database_url: str | None = None, auto_seed: bool | None = None) -
     def stats():
         return guard(svc.stats)
 
+    @app.get("/api/overview")
+    def overview():
+        return guard(svc.overview)
+
     @app.get("/api/typologies")
     def typologies():
         return guard(svc.typologies)
 
     @app.get("/api/alerts")
-    def alerts(typology: str | None = None, min_score: float | None = Query(None, ge=0, le=1), q: str | None = None,
+    def alerts(typology: Optional[str] = None, min_score: Optional[float] = Query(None, ge=0, le=1), q: Optional[str] = None,
                limit: int = Query(100, ge=1, le=500), offset: int = Query(0, ge=0)):
         return guard(svc.alerts, typology, min_score, q, limit, offset)
 
@@ -74,7 +80,7 @@ def create_app(database_url: str | None = None, auto_seed: bool | None = None) -
                      body.category, body.description)
 
     @app.get("/api/cases")
-    def cases(status: str | None = None, typology: str | None = None, priority: str | None = None, q: str | None = None):
+    def cases(status: Optional[str] = None, typology: Optional[str] = None, priority: Optional[str] = None, q: Optional[str] = None):
         return guard(svc.list_cases, status, typology, priority, q)
 
     @app.get("/api/cases/{case_id}")

@@ -170,7 +170,7 @@ def build_case_report(case: dict) -> bytes:
             txt = f"Status {p.get('from')} -> {p.get('to')}"
         else:
             txt = "Case created from complaint; trace and prioritisation run."
-        story.append(Paragraph(f"<b>{str(ev['ts']).replace('T', ' ')}</b> ({ev['actor']}) {txt}", body))
+        story.append(Paragraph(f"<b>{str(ev['ts']).replace('T', ' ').replace('Z', ' UTC')}</b> ({ev['actor']}) {txt}", body))
 
     def footer(canvas, doc_):
         canvas.saveState()

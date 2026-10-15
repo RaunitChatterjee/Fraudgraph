@@ -23,6 +23,7 @@ const qs = (o) => {
 
 export const api = {
   stats: () => req('/api/stats'),
+  overview: () => req('/api/overview'),
   typologies: () => req('/api/typologies'),
   alerts: (f = {}) => req('/api/alerts' + qs(f)),
   cases: (f = {}) => req('/api/cases' + qs(f)),

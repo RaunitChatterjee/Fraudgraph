@@ -201,6 +201,27 @@ class TestService(unittest.TestCase):
         with self.assertRaises(ValueError):
             svc.intake_complaint(c["victim_account"], amount=1.23)
 
+    def test_overview_and_repair(self):
+        svc, _ = self.fresh()
+        ov = svc.overview()
+        self.assertEqual(ov["total_cases"], len(svc.list_cases()))
+        self.assertEqual(len(ov["complaints_by_day"]), 21)
+        self.assertTrue(all("gone_before_filing" in x for x in ov["lag"]))
+        # simulate a seed interrupted before cases were created
+        for t in ("cases", "case_accounts", "case_events"):
+            svc.db.execute(f"DELETE FROM {t}")
+        self.assertEqual(svc.list_cases(), [])
+        made = svc.ensure_cases()
+        self.assertEqual(made, len(svc.db.query("SELECT id FROM complaints")))
+        self.assertEqual(svc.ensure_cases(), 0)
+
+    def test_event_times_are_utc_tagged(self):
+        svc, _ = self.fresh()
+        case = svc.get_case(svc.list_cases()[0]["id"])
+        self.assertTrue(all(e["ts"].endswith("Z") for e in case["events"]))
+        self.assertIsNotNone(case["origin_ts"])
+        self.assertFalse(case["origin_ts"].endswith("Z"))
+
     def test_report_pdf(self):
         pdf = self.svc.report_pdf(self.svc.list_cases()[0]["id"])
         self.assertTrue(pdf.startswith(b"%PDF"))
